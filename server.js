@@ -7,10 +7,10 @@ dotenv.config();
 
 const app = express();
 
-// ✅ Allow your Vercel frontend to access backend
+// Allow Vercel frontend
 app.use(
   cors({
-    origin: "https://digikets-frontend.vercel.app", // your frontend URL
+    origin: "https://digikets-frontend.vercel.app",
     methods: ["POST", "GET"],
     credentials: true,
   })
@@ -18,7 +18,18 @@ app.use(
 
 app.use(express.json());
 
+// Test route to check backend is live
+app.get("/api/test", (req, res) => {
+  res.json({ success: true, message: "Backend is reachable" });
+});
+
+// Contact form route
 app.post("/api/contact", sendMail);
+
+// Default root route
+app.get("/", (req, res) => {
+  res.send("DIGIKETS BACKEND RUNNING ✔");
+});
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {

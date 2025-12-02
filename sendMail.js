@@ -3,19 +3,26 @@ import nodemailer from "nodemailer";
 export const sendMail = async (req, res) => {
   const { name, email, phone, service, message } = req.body;
 
+  // Quick validation
+  if (!name || !email || !message) {
+    return res.status(400).json({
+      success: false,
+      message: "Name, Email, and Message are required",
+    });
+  }
+
   try {
-    // Transporter (Render + Gmail App Password)
+    // Nodemailer transporter
     const transporter = nodemailer.createTransport({
       host: "smtp.gmail.com",
       port: 587,
-      secure: false, // TLS
+      secure: false,
       auth: {
         user: process.env.SMTP_USER,
         pass: process.env.SMTP_PASS,
       },
     });
 
-    // Email content
     const mailOptions = {
       from: `"DigiKets Contact Form" <${process.env.SMTP_USER}>`,
       to: process.env.RECEIVER_EMAIL,
@@ -30,18 +37,27 @@ export const sendMail = async (req, res) => {
       `,
     };
 
-    // Send email
-    await transporter.sendMail(mailOptions);
+    // Send email (async)
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        console.error("EMAIL ERROR:", error);
+        return res.status(500).json({
+          success: false,
+          message: "Failed to send email",
+          error: error.message,
+        });
+      } else {
+        console.log("Email sent:", info.response);
+        return res.json({ success: true, message: "Email sent successfully" });
+      }
+    });
 
-    return res.json({ success: true, message: "Email sent successfully" });
-
-  } catch (error) {
-    console.error("EMAIL ERROR:", error);
-
+  } catch (err) {
+    console.error("SERVER ERROR:", err);
     return res.status(500).json({
       success: false,
-      message: "Failed to send email",
-      error: error.message,
+      message: "Server error",
+      error: err.message,
     });
   }
 };
