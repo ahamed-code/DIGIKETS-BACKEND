@@ -7,20 +7,20 @@ dotenv.config();
 
 const app = express();
 
-// CORS
-app.use(cors({
-  origin: "https://digikets-frontend.vercel.app", // your frontend URL
-}));
+// ✅ Allow your Vercel frontend to access backend
+app.use(
+  cors({
+    origin: "https://digikets-frontend.vercel.app", // your frontend URL
+    methods: ["POST", "GET"],
+    credentials: true,
+  })
+);
 
-// Body parser
 app.use(express.json());
 
-// Routes
 app.post("/api/contact", sendMail);
 
-// PORT
 const PORT = process.env.PORT || 5000;
-
 app.listen(PORT, () => {
   console.log(`Backend running on port ${PORT}`);
 });
