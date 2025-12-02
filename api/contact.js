@@ -1,6 +1,10 @@
 import nodemailer from "nodemailer";
 
-export const sendMail = async (req, res) => {
+export default async function handler(req, res) {
+  if (req.method !== "POST") {
+    return res.status(405).json({ success: false, message: "Method not allowed" });
+  }
+
   const { name, email, phone, service, message } = req.body;
 
   if (!name || !email || !message) {
@@ -12,9 +16,7 @@ export const sendMail = async (req, res) => {
 
   try {
     const transporter = nodemailer.createTransport({
-      host: "smtp.gmail.com",
-      port: 587,
-      secure: false,
+      service: "gmail",
       auth: {
         user: process.env.SMTP_USER,
         pass: process.env.SMTP_PASS,
@@ -22,9 +24,9 @@ export const sendMail = async (req, res) => {
     });
 
     const mailOptions = {
-      from: `"DigiKets Contact Form" <${process.env.SMTP_USER}>`,
+      from: `"DIGIKETS Contact Form" <${process.env.SMTP_USER}>`,
       to: process.env.RECEIVER_EMAIL,
-      subject: `New Message from ${name}`,
+      subject: `New message from ${name}`,
       html: `
         <h2>New Contact Form Message</h2>
         <p><strong>Name:</strong> ${name}</p>
@@ -35,26 +37,16 @@ export const sendMail = async (req, res) => {
       `,
     };
 
-    transporter.sendMail(mailOptions, (error, info) => {
-      if (error) {
-        console.error("EMAIL ERROR:", error);
-        return res.status(500).json({
-          success: false,
-          message: "Failed to send email",
-          error: error.message,
-        });
-      } else {
-        console.log("Email sent:", info.response);
-        return res.json({ success: true, message: "Email sent successfully" });
-      }
-    });
+    await transporter.sendMail(mailOptions);
+
+    return res.status(200).json({ success: true, message: "Email sent successfully" });
 
   } catch (err) {
-    console.error("SERVER ERROR:", err);
+    console.log("Email error:", err);
     return res.status(500).json({
       success: false,
-      message: "Server error",
+      message: "Failed to send email",
       error: err.message,
     });
   }
-};
+}
