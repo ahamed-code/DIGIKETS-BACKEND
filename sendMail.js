@@ -3,7 +3,6 @@ import nodemailer from "nodemailer";
 export const sendMail = async (req, res) => {
   const { name, email, phone, service, message } = req.body;
 
-  // Quick validation
   if (!name || !email || !message) {
     return res.status(400).json({
       success: false,
@@ -12,7 +11,6 @@ export const sendMail = async (req, res) => {
   }
 
   try {
-    // Nodemailer transporter
     const transporter = nodemailer.createTransport({
       host: "smtp.gmail.com",
       port: 587,
@@ -37,7 +35,6 @@ export const sendMail = async (req, res) => {
       `,
     };
 
-    // Send email (async)
     transporter.sendMail(mailOptions, (error, info) => {
       if (error) {
         console.error("EMAIL ERROR:", error);
