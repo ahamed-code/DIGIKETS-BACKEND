@@ -1,7 +1,7 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-import { sendMail } from "./sendMail.js";
+import { sendMail } from "./sendmail.js";
 
 dotenv.config();
 
@@ -10,11 +10,16 @@ const app = express();
 // Allow Vercel frontend
 app.use(
   cors({
-    origin: "https://digikets-frontend.vercel.app",
+    origin: [
+      "https://digikets-frontend.vercel.app",
+      "http://localhost:5173",
+      "http://localhost:3000"
+    ],
     methods: ["POST", "GET"],
     credentials: true,
   })
 );
+
 
 app.use(express.json());
 
